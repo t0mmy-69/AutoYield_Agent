@@ -1,4 +1,3 @@
-# mvpcontest
 # AutoYield Agent
 DeFi Auto-Pilot Agent Wallet for Stablecoin Optimization
 
