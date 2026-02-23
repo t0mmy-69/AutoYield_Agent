@@ -1,0 +1,225 @@
+# SPEC — AutoYield Agent DApp
+Topic: Agent Wallet
+Angle: DeFi Auto-Pilot
+Output: Browser-based DApp (not CLI)
+
+---
+
+## 1) Selected Topic
+Agent Wallet
+
+---
+
+## 2) Target User
+Primary:
+- Stablecoin holders (USDC)
+- $500 to $50,000 capital
+- Passive yield seekers
+- Do not want frequent manual signing
+
+Secondary:
+- DAO treasury operators
+- Crypto KOL showcasing automated yield management
+
+---
+
+## 3) Problem
+Stablecoin APR fluctuates across lending protocols.
+Users face:
+- manual APR tracking
+- manual withdraw and supply actions
+- multiple wallet approvals and signatures
+- unclear gas vs benefit tradeoffs
+- fear of automation losing control
+
+Result:
+- idle capital
+- suboptimal yield
+- high friction
+
+---
+
+## 4) Solution
+AutoYield Agent DApp provides a dedicated Agent Wallet + rule-based autopilot:
+
+- User deposits USDC into Agent Wallet
+- User configures strict rules and risk limits
+- System monitors Aave vs Compound APR
+- Decision engine evaluates net gain after gas
+- Execution engine rotates funds only when rules are satisfied
+- DApp UI displays transparent reasoning and tx logs
+
+---
+
+## 5) Core DApp Flow (Single Happy Path)
+1. User opens DApp and connects wallet
+2. DApp shows Agent Wallet address
+3. User transfers USDC to Agent Wallet
+4. DApp shows USDC balance and enables setup
+5. User sets rules and selects execution mode
+6. User runs "Check Now"
+7. DApp displays APRs, gas estimate, and decision
+8. If decision is ROTATE, user clicks "Execute Rotation"
+9. DApp executes withdraw + supply on testnet
+10. Dashboard updates current protocol and move history
+
+---
+
+## 6) MVP Scope (3-day build)
+
+### In scope
+- DApp UI with dashboard
+- USDC balance tracking for Agent Wallet
+- Rules config panel with presets
+- APR compare module (Aave vs Compound)
+- Gas-aware decision engine
+- Manual confirm execution mode
+- Move history with tx hashes
+- Start/Pause autopilot toggle (interval checks)
+
+### Out of scope
+- Multi-chain, multi-asset
+- LP farming, leverage, complex yield routing
+- Production key management
+- Smart contract development
+- Mainnet deployment
+
+---
+
+## 7) Rules Configuration (MVP)
+Editable in UI:
+- riskProfile: conservative | balanced
+- minAprDeltaPct
+- maxMovesPerDay
+- cooldownMinutes
+- maxGasUsdPerMove
+- execution.mode: manual_confirm | auto
+
+Persist:
+- JSON store for MVP
+
+Default preset for demo:
+- conservative
+- minAprDeltaPct: 1.0
+- maxMovesPerDay: 1
+- cooldownMinutes: 180
+- maxGasUsdPerMove: 0.75
+- mode: manual_confirm
+
+---
+
+## 8) Decision Engine
+Inputs:
+- currentProtocol
+- aaveApr, compoundApr
+- agentWalletUsdcBalance
+- estimatedGasUsd
+- rules
+
+Decision:
+- NOOP if balance is zero
+- NOOP if cooldown active or max moves reached
+- NOOP if APR delta < threshold
+- NOOP if net gain <= gas buffer
+- ROTATE if criteria satisfied
+
+Output must include:
+- decision type
+- from/to protocol
+- apr snapshot
+- delta and net gain estimate
+- reason string for UI
+
+---
+
+## 9) Execution Engine
+In manual_confirm mode:
+- DApp triggers rotation only when user clicks Execute
+
+Rotation steps:
+- withdraw from current protocol
+- approve USDC allowance if needed
+- supply to target protocol
+- log tx hashes
+
+Failure handling:
+- stop autopilot
+- record error state
+- show UI error banner
+
+---
+
+## 10) UI Requirements
+
+### Pages
+- `/` Connect wallet + entry
+- `/dashboard` Main UI
+
+### Dashboard components
+- Wallet section:
+  - user address
+  - agent wallet address
+  - agent USDC balance
+- Rules panel:
+  - presets + editable fields
+  - save/apply rules
+- APR panel:
+  - Aave APR
+  - Compound APR
+  - estimated gas USD
+  - last check timestamp
+- Autopilot controls:
+  - Run Check Now
+  - Start/Pause
+  - Execute Rotation (only appears when ROTATE decision)
+- History table:
+  - time
+  - from/to
+  - amount
+  - tx hashes
+
+---
+
+## 11) Business Model
+Freemium:
+- manual checks
+- 1 move/day
+
+Pro subscription:
+- auto checks at higher frequency
+- unlimited moves within risk rules
+- advanced analytics
+
+Future:
+- performance fee on yield uplift
+
+---
+
+## 12) Edge Cases
+- APR fetch fails
+- RPC rate limit
+- gas estimate fails
+- approvals missing
+- protocol tx revert
+- insufficient balance
+- cooldown active
+- max moves reached
+
+---
+
+## 13) Success Criteria
+- DApp runs locally
+- User can connect wallet and view agent wallet
+- Agent wallet USDC balance displayed
+- Decision engine outputs reasoning
+- At least one successful rotation on testnet
+- Move history shows tx hash and updated protocol state
+
+---
+
+## 14) AI Utilization (Showcase)
+AI used to:
+- generate and explain strategy decisions in natural language
+- evaluate gas vs net yield tradeoff
+- generate risk explanations for the rules panel
+AI is used for transparency and speed, not as a black-box executor.
